@@ -50,8 +50,6 @@ def spatial_transformer_network(input_fmap, theta, **kwargs):
 	batch_grids = affine_grid_generator(H, W, theta)
 
 	# extract x and y coordinates
-	# x_s = tf.squeeze(tf.slice(batch_grids, [0, 0, 0, 0], [-1, -1, -1, 1]))
-	# y_s = tf.squeeze(tf.slice(batch_grids, [0, 0, 0, 1], [-1, -1, -1, 1]))
 	x_s = tf.squeeze(batch_grids[:, :, :, 0:1])
 	y_s = tf.squeeze(batch_grids[:, :, :, 1:2])
 
@@ -62,21 +60,31 @@ def spatial_transformer_network(input_fmap, theta, **kwargs):
 
 def get_pixel_value(img, x, y):
 	"""
-	Utility function to get pixel value for 
-	coordinate vectors x and y from a  4D tensor image.
+	Utility function to get pixel value for coordinate
+	vectors x and y from a  4D tensor image.
+
+	Input
+	-----
+	- img: tensor of shape (B, H, W, C)
+	- x: flattened tensor of shape (B*H*W, )
+	- y: flattened tensor of shape (B*H*W, )
+
+	Returns
+	-------
+	- output: tensor of shape (B, H, W, C)
 	"""
-	B = tf.shape(img)[0]
-	H = tf.shape(img)[1]
-	W = tf.shape(img)[2]
-	C = tf.shape(img)[3]
+	shape = tf.shape(x)
+	batch_size = shape[0]
+	height = shape[1]
+	width = shape[2]
 
-	# flatten image
-	img_flat = tf.reshape(img, [-1, C])
+	batch_idx = tf.range(0, batch_size)
+	batch_idx = tf.reshape(batch_idx, (batch_size, 1, 1))
+	b = tf.tile(batch_idx, (1, height, width))
 
-	# flatten idx
-	idx_flat = (y * W) + x
+	indices = tf.pack([b, y, x], 3)
 
-	return tf.gather(img_flat, idx_flat)
+	return tf.gather_nd(img, indices)
 
 def affine_grid_generator(height, width, theta):
 	"""
@@ -125,11 +133,9 @@ def affine_grid_generator(height, width, theta):
 	ones = tf.ones_like(x_t_flat)
 	sampling_grid = tf.stack([x_t_flat, y_t_flat, ones])
 
-	# repeat grid and theta num_batch times
+	# repeat grid num_batch times
 	sampling_grid = tf.expand_dims(sampling_grid, axis=0)
 	sampling_grid = tf.tile(sampling_grid, tf.pack([num_batch, 1, 1]))
-	# thetas = tf.expand_dims(theta, axis=0)
-	# thetas = tf.tile(thetas, tf.pack([num_batch, 1, 1]))
 
 	# cast to float32 (required for matmul)
 	theta = tf.cast(theta, 'float32')
@@ -164,36 +170,32 @@ def bilinear_sampler(img, x, y):
 	- interpolated images according to grids. Same size as grid.
 
 	"""
-	# grab dimensions
+	# prepare useful params
 	B = tf.shape(img)[0]
 	H = tf.shape(img)[1]
 	W = tf.shape(img)[2]
 	C = tf.shape(img)[3]
 
-	# # flatten
-	# x = tf.reshape(x, [-1])
-	# y = tf.reshape(y, [-1])
+	max_y = tf.cast(H - 1, 'int32')
+	max_x = tf.cast(W - 1, 'int32')
+	zero = tf.zeros([], dtype='int32')
 
-	# cast as float32 (required for rescaling)
+	# cast indices as float32 (for rescaling)
 	x = tf.cast(x, 'float32')
 	y = tf.cast(y, 'float32')
 
-	# and rescale x and y to [0, W/H]
-	x = ((x + 1.) * tf.cast(W, 'float32')) * 0.5
-	y = ((y + 1.) * tf.cast(H, 'float32')) * 0.5
+	# rescale x and y to [0, W/H]
+	x = 0.5 * ((x + 1.0) * tf.cast(W, 'float32'))
+	y = 0.5 * ((y + 1.0) * tf.cast(H, 'float32'))
 
 	# grab 4 nearest corner points for each (x_i, y_i)
+	# i.e. we need a rectangle around the point of interest
 	x0 = tf.cast(tf.floor(x), 'int32')
 	x1 = x0 + 1
 	y0 = tf.cast(tf.floor(y), 'int32')
 	y1 = y0 + 1
 
-	# making sure we don't violate image boundaries
-	zero = tf.zeros([], dtype='int32')
-	max_y = tf.cast(H - 1, 'int32')
-	max_x = tf.cast(W - 1, 'int32')
-
-	# so we clip to range [0, H] or [0, W]
+	# clip to range [0, H/W] to not violate img boundaries
 	x0 = tf.clip_by_value(x0, zero, max_x)
 	x1 = tf.clip_by_value(x1, zero, max_x)
 	y0 = tf.clip_by_value(y0, zero, max_y)

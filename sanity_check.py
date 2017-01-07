@@ -2,9 +2,6 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow as tf
-from scipy import ndimage
-import matplotlib.pyplot as plt
-
 from spatial_transformer import spatial_transformer_network
 from keras.preprocessing.image import load_img, img_to_array, array_to_img
 
@@ -54,6 +51,7 @@ with tf.variable_scope('spatial_transformer_0'):
 	initial = np.array([[1., 0, 0], [0, 1., 0]])
 	initial = initial.astype('float32')
 	initial = initial.flatten()
+	print("Theta: {}".format(initial.shape))
 
 	b_fc1 = tf.Variable(initial_value=initial, name='b_fc1')
 	h_fc1 = tf.matmul(tf.zeros([B, H*W*C]), W_fc1) + b_fc1
@@ -64,5 +62,5 @@ sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 y = sess.run(h_trans, feed_dict={x: input_img})
 y = np.reshape(y, (B, H, W, C))
-plt.imshow(y[1])
-plt.show()
+y = array_to_img(y[0])
+y.show()
