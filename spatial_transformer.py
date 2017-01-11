@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-def spatial_transformer_network(input_fmap, theta, **kwargs):
+def spatial_transformer_network(input_fmap, theta, out_dims=None, **kwargs):
 	"""
 	Spatial Transformer Network layer implementation as described in [1].
 
@@ -46,8 +46,14 @@ def spatial_transformer_network(input_fmap, theta, **kwargs):
 	# reshape theta to (B, 2, 3)
 	theta = tf.reshape(theta, [B, 2, 3])
 
-	# generate grids
+	# generate grids of same size
 	batch_grids = affine_grid_generator(H, W, theta)
+
+	# or upsample/downsample if specified
+	if out_dims:
+		out_H = out_dims[0]
+		out_W = out_dims[1]
+		batch_grids = affine_grid_generator(out_H, out_W, theta)
 
 	# extract x and y coordinates
 	x_s = tf.squeeze(batch_grids[:, 0:1, :, :])

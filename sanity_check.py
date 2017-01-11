@@ -26,44 +26,54 @@ def load_data(dims, img_name, view=False):
 	img = img / 255.0
 	return img
 
-# load 4 cat images
-img1 = load_data(DIMS, CAT1)
-img2 = load_data(DIMS, CAT2)
-img3 = load_data(DIMS, CAT3)
-img4 = load_data(DIMS, CAT4)
+def main():
+	# out dims
+	out_H = 400
+	out_W = 400
+	out_dims = (out_H, out_W)
 
-# concat into tensor of shape (2, 600, 600, 3)
-input_img = np.concatenate([img1, img2, img3, img4], axis=0)
+	# load 4 cat images
+	img1 = load_data(DIMS, CAT1, view=True)
+	img2 = load_data(DIMS, CAT2)
+	img3 = load_data(DIMS, CAT3)
+	img4 = load_data(DIMS, CAT4)
 
-# dimension sanity check
-print("Input Img Shape: {}".format(input_img.shape))
+	# concat into tensor of shape (2, 600, 600, 3)
+	input_img = np.concatenate([img1, img2, img3, img4], axis=0)
 
-# grab shape
-B, H, W, C = input_img.shape
+	# dimension sanity check
+	print("Input Img Shape: {}".format(input_img.shape))
 
-# placeholders
-x = tf.placeholder(tf.float32, [None, H, W, C])
+	# grab shape
+	B, H, W, C = input_img.shape
 
-# Create localisation network and convolutional layer
-with tf.variable_scope('spatial_transformer_0'):
+	# placeholders
+	x = tf.placeholder(tf.float32, [None, H, W, C])
 
-	# Create a fully-connected layer with 6 output nodes
-	n_fc = 6
-	W_fc1 = tf.Variable(tf.zeros([H*W*C, n_fc]), name='W_fc1')
+	# Create localisation network and convolutional layer
+	with tf.variable_scope('spatial_transformer_0'):
 
-	# identity transform
-	theta = np.array([[1., 0, 0], [0, 1., 0]])
-	theta = theta.astype('float32')
-	theta = theta.flatten()
+		# Create a fully-connected layer with 6 output nodes
+		n_fc = 6
+		W_fc1 = tf.Variable(tf.zeros([H*W*C, n_fc]), name='W_fc1')
 
-	b_fc1 = tf.Variable(initial_value=theta, name='b_fc1')
-	h_fc1 = tf.matmul(tf.zeros([B, H*W*C]), W_fc1) + b_fc1
-	h_trans = spatial_transformer_network(x, h_fc1)
+		# identity transform
+		theta = np.array([[1., 0, 0], [0, 1., 0]])
+		theta = theta.astype('float32')
+		theta = theta.flatten()
 
-# run session
-sess = tf.Session()
-sess.run(tf.global_variables_initializer())
-y = sess.run(h_trans, feed_dict={x: input_img})
-y = np.reshape(y, (B, H, W, C))
-y = array_to_img(y[2])
-y.show()
+		b_fc1 = tf.Variable(initial_value=theta, name='b_fc1')
+		h_fc1 = tf.matmul(tf.zeros([B, H*W*C]), W_fc1) + b_fc1
+		h_trans = spatial_transformer_network(x, h_fc1, out_dims)
+
+	# run session
+	sess = tf.Session()
+	sess.run(tf.global_variables_initializer())
+	y = sess.run(h_trans, feed_dict={x: input_img})
+	print(y.shape)
+	y = np.reshape(y, (B, out_H, out_W, C))
+	y = array_to_img(y[0])
+	y.show()
+
+if __name__ == '__main__':
+	main()
