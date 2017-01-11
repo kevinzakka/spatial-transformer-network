@@ -50,8 +50,8 @@ def spatial_transformer_network(input_fmap, theta, **kwargs):
 	batch_grids = affine_grid_generator(H, W, theta)
 
 	# extract x and y coordinates
-	x_s = tf.squeeze(batch_grids[:, :, :, 0:1])
-	y_s = tf.squeeze(batch_grids[:, :, :, 1:2])
+	x_s = tf.squeeze(batch_grids[:, 0:1, :, :])
+	y_s = tf.squeeze(batch_grids[:, 1:2, :, :])	
 
 	# sample input with grid to get output
 	out_fmap = bilinear_sampler(input_fmap, x_s, y_s)
@@ -107,8 +107,8 @@ def affine_grid_generator(height, width, theta):
 
 	Returns
 	-------
-	- normalized gird (-1, 1) of shape (num_batch, H, W, 2).
-	  The 4th dimension has 2 components: (x, y) which are the 
+	- normalized gird (-1, 1) of shape (num_batch, 2, H, W).
+	  The 2nd dimension has 2 components: (x, y) which are the 
 	  sampling points of the original image for each point in the
 	  target image.
 
@@ -140,13 +140,14 @@ def affine_grid_generator(height, width, theta):
 	# cast to float32 (required for matmul)
 	theta = tf.cast(theta, 'float32')
 	sampling_grid = tf.cast(sampling_grid, 'float32')
-	
+
 	# transform the sampling grid - batch multiply
-	batch_grids = tf.matmul(theta, sampling_grid)
+	batch_grids = tf.batch_matmul(theta, sampling_grid)
 	# batch grid has shape (num_batch, 2, H*W)
 
 	# reshape to (num_batch, H, W, 2)
-	batch_grids = tf.reshape(batch_grids, [num_batch, height, width, 2])
+	batch_grids = tf.reshape(batch_grids, [num_batch, 2, height, width])
+	# batch_grids = tf.transpose(batch_grids, [0, 2, 1, 3])
 
 	return batch_grids
 
