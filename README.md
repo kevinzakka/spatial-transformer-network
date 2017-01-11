@@ -8,6 +8,12 @@ This is a **Tensorflow** implementation of [Spatial Transformer Networks](https:
 
 *Spatial Transformer Networks* (STN) is a differentiable module that can be inserted anywhere in ConvNet architecture to increase its geometric invariance. It effectively gives the network the ability to spatially transform feature maps at no extra data or supervision cost.
 
+## To-DO
+
+- [X] fixed slicing issue which was causing incorrect output
+- [ ] add option to upsample or downsample output image
+- [ ] add option to restrict transformation to "attention"
+
 ## Background Information
 
 <p align="center">
