@@ -11,7 +11,7 @@ This is a **Tensorflow** implementation of [Spatial Transformer Networks](https:
 ## To-DO
 
 - [X] fixed slicing issue which was causing incorrect output
-- [ ] add option to upsample or downsample output image
+- [X] add option to upsample or downsample output image
 - [ ] add option to restrict transformation to "attention"
 
 ## Background Information
