@@ -76,15 +76,22 @@ h_trans = spatial_transformer_network(x, h_fc1)
 
 ## Example
 
-Run `main.py` to get a feel of how the spatial transformer can be used. It runs on the cluttered mnist dataset and has modular code that you can alter and play around with. 
+Run `main.py` to get a feel of how the spatial transformer can be plugged into any existing code. The example code uses the cluttered mnist dataset which you can download [here](https://s3.amazonaws.com/lasagne/recipes/datasets/mnist_cluttered_60x60_6distortions.npz).
 
-Here are the Tensorboard visualizations of the loss and accuracy after running for a few epochs. You should probably run for much longer especially if you're using a GPU.
-
+Here are the Tensorboard visualizations of the loss and accuracy after running for a few epochs. You probably want to run for much longer especially if you have a GPU.
 
 <p align="center">
- <img src="./img/train_loss.png">
- <img src="./img/train_acc.png">
+ <img src="./img/train_loss.png" width="400px">
+ <img src="./img/train_acc.png" width="400px">
 </p>
+
+Finally, here is what the STN module learns after a few iterations:
+
+<p align="center">
+ <img src="./img/train_loss.png" width="400px">
+ <img src="./img/train_acc.png" width="400px">
+</p>
+
 
 ## Attribution
 
