@@ -82,7 +82,8 @@ Here are the Tensorboard visualizations of the loss and accuracy after running f
 
 
 <p align="center">
- <img src="./img/matrix.png" width="170px">
+ <img src="./img/train_loss.png">
+ <img src="./img/train_acc.png">
 </p>
 
 ## Attribution
