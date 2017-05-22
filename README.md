@@ -12,7 +12,6 @@ This is a **Tensorflow** implementation of [Spatial Transformer Networks](https:
 
 - [X] fixed slicing issue which was causing incorrect output
 - [X] add option to upsample or downsample output image
-- [ ] add option to restrict transformation to "attention"
 
 ## Background Information
 
@@ -52,7 +51,7 @@ out = spatial_transformer_network(input_feature_map, theta, out_dims)
 
 You must define a localization network right before using this layer. The localization network is usually a ConvNet or a FC-net that has 6 output nodes (the 6 parameters of the affine transformation).
 
-You can initialize the localization network to the identity transform before starting the training process. Here's a small sample code for illustration purposes.
+You need to initialize the localization network to the identity transform before starting the training process. Here's a small sample code for illustration purposes.
 
 ```python
 # params
@@ -75,7 +74,16 @@ h_fc1 = tf.matmul(tf.zeros([B, H*W*C]), W_fc1) + b_fc1
 h_trans = spatial_transformer_network(x, h_fc1)
 ```
 
-## Requirements
+## Example
+
+Run `main.py` to get a feel of how the spatial transformer can be used. It runs on the cluttered mnist dataset and has modular code that you can alter and play around with. 
+
+Here are the Tensorboard visualizations of the loss and accuracy after running for a few epochs. You should probably run for much longer especially if you're using a GPU.
+
+
+<p align="center">
+ <img src="./img/matrix.png" width="170px">
+</p>
 
 ## Attribution
 
