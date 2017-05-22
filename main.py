@@ -202,17 +202,18 @@ def build_convnet():
 	bn5 = BatchNormalization(fc2, phase, use_relu=True, name='bn5')
 	logits = Dense(bn5, 512, num_classes, name='fc3', use_relu=False)
 
-	return logits
+	return h_trans, logits
 
 def main():
 
 	# load the data
+	print("Loading the data...")
 	X_train, y_train, X_test, y_test, X_valid, y_valid = load_data(root_dir)
 
 	# saniy check dimensions
-	print("Train: {}".format(X_train.shape))
-	print("Test: {}".format(X_test.shape))
-	print("Valid: {}".format(X_valid.shape))
+	# print("Train: {}".format(X_train.shape))
+	# print("Test: {}".format(X_test.shape))
+	# print("Valid: {}".format(X_valid.shape))
 
 	# let's view a small sample
 	if VIEW:
@@ -236,7 +237,41 @@ def main():
 	# plt.ylabel("Frequency")
 	# plt.show()
 
-	logits = build_convnet()
+	print("Building ConvNet...")
+	conv1_loc = Conv2D(X, 1, 5, 32, name='conv1_loc')
+	pool1_loc = MaxPooling2D(conv1_loc, use_relu=True, name='pool1_loc')
+	conv2_loc = Conv2D(pool1_loc, 32, 5, 64, name='conv2_loc')
+	pool2_loc = MaxPooling2D(conv2_loc, use_relu=True, name='pool2_loc')
+
+	pool2_loc_flat, pool2_loc_size = Flatten(pool2_loc)
+
+	fc1_loc = Dense(pool2_loc_flat, pool2_loc_size, 2048, use_relu=False, name='fc1_loc')
+	fc2_loc = Dense(fc1_loc, 2048, 512, use_relu=True, name='fc2_loc')
+	fc3_loc = Dense(fc2_loc, 512, 6, use_relu=False, trans=True, name='fc3_loc')
+
+	# spatial transformer
+	h_trans = stn(X, fc3_loc)
+
+	# convnet
+	conv1 = Conv2D(X, 1, 5, 32, name='conv1')
+	bn1 = BatchNormalization(conv1, phase, name='bn1')
+	pool1 = MaxPooling2D(bn1, use_relu=True, name='pool1')
+
+	conv2 = Conv2D(pool1, 32, 5, 64, name='conv2')
+	bn2 = BatchNormalization(conv2, phase, name='bn2')
+	pool2 = MaxPooling2D(bn2, use_relu=True, name='pool2')
+
+	conv3 = Conv2D(pool2, 64, 3, 128, name='conv3')
+	bn3 = BatchNormalization(conv3, phase, name='bn3')
+	pool3 = MaxPooling2D(bn3, use_relu=True, name='pool3')
+
+	pool3_flat, pool3_size = Flatten(pool3)
+
+	fc1 = Dense(pool3_flat, pool3_size, 2048, use_relu=False, name='fc1')
+	bn4 = BatchNormalization(fc1, phase, use_relu=True, name='bn4')
+	fc2 = Dense(bn4, 2048, 512, use_relu=False, name='fc2')
+	bn5 = BatchNormalization(fc2, phase, use_relu=True, name='bn5')
+	logits = Dense(bn5, 512, num_classes, name='fc3', use_relu=False)
 
 	# define cost function
 	cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y)
@@ -303,6 +338,7 @@ def main():
 
 			iter_per_epoch, batch_indices = generate_batch_indices(X_train)
 			batch_indices = batch_indices * num_epochs
+			epoch_num = 0
 
 			for i in range(num_iterations):
 
@@ -343,30 +379,29 @@ def main():
 					print("No improvement found in a while, stopping optimization.")
 					break
 
-				# # for plotting
-				# if i_global == 1:
-				# 	print(idx)
-				# 	print("Plotting input imgs...")
-				# 	input_imgs = batch_X_train[:9]
-				# 	input_imgs = np.reshape(input_imgs, [-1, 60, 60])
-				# 	plt.clf()
-				# 	for j in range(9):
-				# 		plt.subplot(3, 3, j+1)
-				# 		plt.imshow(input_imgs[j], cmap='gray')
-				# 		plt.axis('off')
-				# 	fig.canvas.draw()
-				# 	plt.savefig(vis_path + 'epoch_0.png', bbox_inches='tight')
+				# for plotting
+				if i_global == 1:
+					print("Plotting input imgs...")
+					input_imgs = batch_X_train[:9]
+					input_imgs = np.reshape(input_imgs, [-1, 60, 60])
+					plt.clf()
+					for j in range(9):
+						plt.subplot(3, 3, j+1)
+						plt.imshow(input_imgs[j], cmap='gray')
+						plt.axis('off')
+					fig.canvas.draw()
+					plt.savefig(vis_path + 'epoch_0.png', bbox_inches='tight')
 
-				# if i % 8 == 0 and i != 0:
-				# 	thetas = sess.run(h_trans, feed_dict={X: batch_X_train[:9], phase: True})
-				# 	thetas = thetas.squeeze()
-				# 	plt.clf()
-				# 	for j in range(9):
-				# 		plt.subplot(3, 3, j+1)
-				# 		plt.imshow(thetas[j], cmap='gray')
-				# 		plt.axis('off')
-				# 	fig.canvas.draw()
-				# 	plt.savefig(vis_path + 'epoch_' + str(i_global) + '.png', bbox_inches='tight')
+				# plotting
+				thetas = sess.run(h_trans, feed_dict={X: batch_X_train, phase: True})
+				thetas = thetas[0:9].squeeze()
+				plt.clf()
+				for j in range(9):
+					plt.subplot(3, 3, j+1)
+					plt.imshow(thetas[j], cmap='gray')
+					plt.axis('off')
+				fig.canvas.draw()
+				plt.savefig(vis_path + 'epoch_' + str(i_global) + '.png', bbox_inches='tight')
 
 			toc = time.time()
 			print("Time: {:.2f}s".format(toc-tic))
