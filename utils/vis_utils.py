@@ -60,3 +60,25 @@ def view_images(X, ubound=1.0, save=False, name=''):
 		plt.show()
 	else:
 		raise ValueError
+
+def plot_images(images, cls_true, cls_pred=None):
+
+	assert len(images) == len(cls_true) == 9
+
+	# Create figure with sub-plots.
+	fig, axes = plt.subplots(3, 3)
+
+	for i, ax in enumerate(axes.flat):
+		# plot the image
+		ax.imshow(images[i], cmap='gray', interpolation='spline16')
+			
+		if cls_pred is None:
+			xlabel = "Digit: {}".format(cls_true[i])
+		else:
+			xlabel = "True: {0}\nPred: {1}".format(cls_true[i], cls_pred[i])
+			
+		ax.set_xlabel(xlabel)
+		ax.set_xticks([])
+		ax.set_yticks([])
+
+	plt.show()
