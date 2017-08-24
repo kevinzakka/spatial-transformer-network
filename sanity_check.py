@@ -50,10 +50,10 @@ def main():
 	# placeholders
 	x = tf.placeholder(tf.float32, [None, H, W, C])
 
-	# Create localisation network and convolutional layer
+	# create localisation network and convolutional layer
 	with tf.variable_scope('spatial_transformer_0'):
 
-		# Create a fully-connected layer with 6 output nodes
+		# create a fully-connected layer with 6 output nodes
 		n_fc = 6
 		W_fc1 = tf.Variable(tf.zeros([H*W*C, n_fc]), name='W_fc1')
 
