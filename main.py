@@ -210,7 +210,7 @@ def main():
 	print("Loading the data...")
 	X_train, y_train, X_test, y_test, X_valid, y_valid = load_data(root_dir)
 
-	# saniy check dimensions
+	# sanity check dimensions
 	# print("Train: {}".format(X_train.shape))
 	# print("Test: {}".format(X_test.shape))
 	# print("Valid: {}".format(X_valid.shape))
@@ -253,7 +253,7 @@ def main():
 	h_trans = stn(X, fc3_loc)
 
 	# convnet
-	conv1 = Conv2D(X, 1, 5, 32, name='conv1')
+	conv1 = Conv2D(h_trans, 1, 5, 32, name='conv1')
 	bn1 = BatchNormalization(conv1, phase, name='bn1')
 	pool1 = MaxPooling2D(bn1, use_relu=True, name='pool1')
 
