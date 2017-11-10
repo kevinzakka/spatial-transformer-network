@@ -8,11 +8,6 @@ This is a **Tensorflow** implementation of [Spatial Transformer Networks](https:
 
 *Spatial Transformer Networks* (STN) is a differentiable module that can be inserted anywhere in ConvNet architecture to increase its geometric invariance. It effectively gives the network the ability to spatially transform feature maps at no extra data or supervision cost.
 
-## To-DO
-
-- [X] fixed slicing issue which was causing incorrect output
-- [X] add option to upsample or downsample output image
-
 ## Background Information
 
 <p align="center">
@@ -32,6 +27,10 @@ The affine transformation has been constrained to one of " *attention* ". It all
 <p align="center">
  <img src="./img/matrix.png" width="170px">
 </p>
+
+## Explore
+
+Run the [Sanity Check](https://github.com/kevinzakka/spatial-transformer-network/blob/master/Sanity%20Check.ipynb) to get a feel of how the spatial transformer can be plugged into any existing code.
 
 ## API 
 
@@ -73,21 +72,6 @@ h_fc1 = tf.matmul(tf.zeros([B, H*W*C]), W_fc1) + b_fc1
 # spatial transformer layer
 h_trans = spatial_transformer_network(x, h_fc1)
 ```
-
-## Example
-
-Run `main.py` to get a feel of how the spatial transformer can be plugged into any existing code. The example code uses the cluttered mnist dataset which you can download [here](https://s3.amazonaws.com/lasagne/recipes/datasets/mnist_cluttered_60x60_6distortions.npz).
-
-Here are the Tensorboard visualizations of the loss and accuracy after running for a few epochs. You probably want to run for much longer especially if you have a GPU.
-
-<p align="center">
- <img src="./img/train_loss.png" width="400px">
- <img src="./img/train_acc.png" width="400px">
-</p>
-
-Finally, here is what the STN module learns after a few iterations:
-
-(to be updated...)
 
 ## Attribution
 
