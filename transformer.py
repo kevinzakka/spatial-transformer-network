@@ -55,9 +55,6 @@ def spatial_transformer_network(input_fmap, theta, out_dims=None, **kwargs):
     else:
         batch_grids = affine_grid_generator(H, W, theta)
 
-    # extract x and y coordinates
-    # x_s = tf.squeeze(batch_grids[:, 0:1, :, :])
-    # y_s = tf.squeeze(batch_grids[:, 1:2, :, :]) 
     x_s = batch_grids[:, 0, :, :]
     y_s = batch_grids[:, 1, :, :]
 
@@ -137,7 +134,7 @@ def affine_grid_generator(height, width, theta):
     x_t_flat = tf.reshape(x_t, [-1])
     y_t_flat = tf.reshape(y_t, [-1])
 
-    # reshape to (x_t, y_t , 1)
+    # reshape to [x_t, y_t , 1] - (homogeneous form)
     ones = tf.ones_like(x_t_flat)
     sampling_grid = tf.stack([x_t_flat, y_t_flat, ones])
 
@@ -155,7 +152,6 @@ def affine_grid_generator(height, width, theta):
 
     # reshape to (num_batch, H, W, 2)
     batch_grids = tf.reshape(batch_grids, [num_batch, 2, height, width])
-    # batch_grids = tf.transpose(batch_grids, [0, 2, 1, 3])
 
     return batch_grids
 
