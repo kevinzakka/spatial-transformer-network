@@ -30,7 +30,14 @@ The affine transformation has been constrained to one of " *attention* ". It all
 
 ## Explore
 
-Run the [Sanity Check](https://github.com/kevinzakka/spatial-transformer-network/blob/master/Sanity%20Check.ipynb) to get a feel of how the spatial transformer can be plugged into any existing code.
+Run the [Sanity Check](https://github.com/kevinzakka/spatial-transformer-network/blob/master/Sanity%20Check.ipynb) to get a feel of how the spatial transformer can be plugged into any existing code. For example, here's the result of a 45 degree rotation:
+
+```
+<p align="center">
+ <img src="./img/b4.png" alt="Drawing" width="40%">
+ <img src="./img/after.png" alt="Drawing" width="40%">
+</p>
+```
 
 ## API 
 
