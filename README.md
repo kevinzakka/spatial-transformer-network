@@ -25,13 +25,13 @@ The STN is composed of 3 elements.
 The affine transformation is specified through the transformation matrix A
 
 <p align="center">
- <img src="./img/general.png">
+ <img src="./img/general.png" width="175px">
 </p>
 
 It can be constrained to one of *attention* by writing it in the form
 
 <p align="center">
- <img src="./img/attention.png">
+ <img src="./img/attention.png" width="175px">
 </p>
 
 where the parameters `s`, `t_x` and `t_y` can be regressed to allow cropping, translation, and isotropic scaling.
