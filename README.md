@@ -89,5 +89,5 @@ h_trans = spatial_transformer_network(x, h_fc1)
 ## Attribution
 
 - [Torch Blog Post on STN's](http://torch.ch/blog/2015/09/07/spatial_transformers.html)
-- [daviddao's Tensorflow Implementation](http://torch.ch/blog/2015/09/07/spatial_transformers.html)
+- [daviddao's Tensorflow Implementation](https://github.com/daviddao/spatial-transformer-tensorflow)
 - Shoutout to [Eder Santana](https://twitter.com/edersantana) for introducing and helping me understand the paper!
