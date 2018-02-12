@@ -4,7 +4,7 @@
  <img src="./img/transformation.png" width="400px">
 </p>
 
-This is a **Tensorflow** implementation of [Spatial Transformer Networks](https://arxiv.org/abs/1506.02025) by *Max Jaderberg, Karen Simonyan, Andrew Zisserman* and *Koray Kavukcuoglu*.
+This is a **Tensorflow** implementation of [Spatial Transformer Networks](https://arxiv.org/abs/1506.02025) by *Max Jaderberg, Karen Simonyan, Andrew Zisserman* and *Koray Kavukcuoglu*, accompanying by two-part blog [tutorial series](https://kevinzakka.github.io/2017/01/18/stn-part2/).
 
 *Spatial Transformer Networks* (STN) is a differentiable module that can be inserted anywhere in ConvNet architecture to increase its geometric invariance. It effectively gives the network the ability to spatially transform feature maps at no extra data or supervision cost.
 
