@@ -1,5 +1,5 @@
 import tensorflow as tf
-from utils.print_utils import * 
+
 
 def spatial_transformer_network(input_fmap, theta, out_dims=None, **kwargs):
     """
@@ -7,12 +7,12 @@ def spatial_transformer_network(input_fmap, theta, out_dims=None, **kwargs):
 
     The layer is composed of 3 elements:
 
-    - localisation_net: takes the original image as input and outputs 
+    - localization_net: takes the original image as input and outputs
       the parameters of the affine transformation that should be applied
       to the input image.
 
-    - affine_grid_generator: generates a grid of (x,y) coordinates that 
-      correspond to a set of points where the input should be sampled 
+    - affine_grid_generator: generates a grid of (x,y) coordinates that
+      correspond to a set of points where the input should be sampled
       to produce the transformed output.
 
     - bilinear_sampler: takes as input the original image and the grid
@@ -21,11 +21,11 @@ def spatial_transformer_network(input_fmap, theta, out_dims=None, **kwargs):
     Input
     -----
     - input_fmap: output of the previous layer. Can be input if spatial
-      transformer layer is at the beginning of architecture. Should be 
-      a tensor of shape (B, H, W, C). 
+      transformer layer is at the beginning of architecture. Should be
+      a tensor of shape (B, H, W, C).
 
-    - theta: affine transform tensor of shape (B, 6). Permits cropping, 
-      translation and isotropic scaling. Initialize to identity matrix. 
+    - theta: affine transform tensor of shape (B, 6). Permits cropping,
+      translation and isotropic scaling. Initialize to identity matrix.
       It is the output of the localization network.
 
     Returns
@@ -42,7 +42,6 @@ def spatial_transformer_network(input_fmap, theta, out_dims=None, **kwargs):
     B = tf.shape(input_fmap)[0]
     H = tf.shape(input_fmap)[1]
     W = tf.shape(input_fmap)[2]
-    C = tf.shape(input_fmap)[3]
 
     # reshape theta to (B, 2, 3)
     theta = tf.reshape(theta, [B, 2, 3])
@@ -63,6 +62,7 @@ def spatial_transformer_network(input_fmap, theta, out_dims=None, **kwargs):
 
     return out_fmap
 
+
 def get_pixel_value(img, x, y):
     """
     Utility function to get pixel value for coordinate
@@ -71,8 +71,8 @@ def get_pixel_value(img, x, y):
     Input
     -----
     - img: tensor of shape (B, H, W, C)
-    - x: flattened tensor of shape (B*H*W, )
-    - y: flattened tensor of shape (B*H*W, )
+    - x: flattened tensor of shape (B*H*W,)
+    - y: flattened tensor of shape (B*H*W,)
 
     Returns
     -------
@@ -91,38 +91,38 @@ def get_pixel_value(img, x, y):
 
     return tf.gather_nd(img, indices)
 
+
 def affine_grid_generator(height, width, theta):
     """
     This function returns a sampling grid, which when
-    used with the bilinear sampler on the input feature 
-    map, will create an output feature map that is an 
+    used with the bilinear sampler on the input feature
+    map, will create an output feature map that is an
     affine transformation [1] of the input feature map.
 
     Input
     -----
     - height: desired height of grid/output. Used
-      to downsample or upsample. 
+      to downsample or upsample.
 
     - width: desired width of grid/output. Used
-      to downsample or upsample. 
+      to downsample or upsample.
 
-    - theta: affine transform matrices of shape (num_batch, 2, 3). 
-      For each image in the batch, we have 6 theta parameters of 
+    - theta: affine transform matrices of shape (num_batch, 2, 3).
+      For each image in the batch, we have 6 theta parameters of
       the form (2x3) that define the affine transformation T.
 
     Returns
     -------
-    - normalized gird (-1, 1) of shape (num_batch, 2, H, W).
-      The 2nd dimension has 2 components: (x, y) which are the 
+    - normalized grid (-1, 1) of shape (num_batch, 2, H, W).
+      The 2nd dimension has 2 components: (x, y) which are the
       sampling points of the original image for each point in the
       target image.
 
     Note
     ----
-    [1]: the affine transformation allows cropping, translation, 
+    [1]: the affine transformation allows cropping, translation,
          and isotropic scaling.
     """
-    # grab batch size
     num_batch = tf.shape(theta)[0]
 
     # create normalized 2D grid
@@ -155,10 +155,11 @@ def affine_grid_generator(height, width, theta):
 
     return batch_grids
 
+
 def bilinear_sampler(img, x, y):
     """
-    Performs bilinear sampling of the input images according to the 
-    normalized coordinates provided by the sampling grid. Note that 
+    Performs bilinear sampling of the input images according to the
+    normalized coordinates provided by the sampling grid. Note that
     the sampling is done identically for each channel of the input.
 
     To test if the function works properly, output image should be
@@ -172,35 +173,28 @@ def bilinear_sampler(img, x, y):
 
     Returns
     -------
-    - interpolated images according to grids. Same size as grid.
+    - out: interpolated images according to grids. Same size as grid.
 
     """
-    # prepare useful params
-    B = tf.shape(img)[0]
     H = tf.shape(img)[1]
     W = tf.shape(img)[2]
-    C = tf.shape(img)[3]
-
     max_y = tf.cast(H - 1, 'int32')
     max_x = tf.cast(W - 1, 'int32')
     zero = tf.zeros([], dtype='int32')
 
-    # cast indices as float32 (for rescaling)
+    # rescale x and y to [0, W-1/H-1]
     x = tf.cast(x, 'float32')
     y = tf.cast(y, 'float32')
-
-    # rescale x and y to [0, W/H]
-    x = 0.5 * ((x + 1.0) * tf.cast(W, 'float32'))
-    y = 0.5 * ((y + 1.0) * tf.cast(H, 'float32'))
+    x = 0.5 * ((x + 1.0) * tf.cast(max_x-1, 'float32'))
+    y = 0.5 * ((y + 1.0) * tf.cast(max_y-1, 'float32'))
 
     # grab 4 nearest corner points for each (x_i, y_i)
-    # i.e. we need a rectangle around the point of interest
     x0 = tf.cast(tf.floor(x), 'int32')
     x1 = x0 + 1
     y0 = tf.cast(tf.floor(y), 'int32')
     y1 = y0 + 1
 
-    # clip to range [0, H/W] to not violate img boundaries
+    # clip to range [0, H-1/W-1] to not violate img boundaries
     x0 = tf.clip_by_value(x0, zero, max_x)
     x1 = tf.clip_by_value(x1, zero, max_x)
     y0 = tf.clip_by_value(y0, zero, max_y)
@@ -211,7 +205,7 @@ def bilinear_sampler(img, x, y):
     Ib = get_pixel_value(img, x0, y1)
     Ic = get_pixel_value(img, x1, y0)
     Id = get_pixel_value(img, x1, y1)
-    
+
     # recast as float for delta calculation
     x0 = tf.cast(x0, 'float32')
     x1 = tf.cast(x1, 'float32')

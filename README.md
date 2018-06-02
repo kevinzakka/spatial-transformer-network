@@ -77,7 +77,7 @@ initial = initial.astype('float32').flatten()
 # input placeholder
 x = tf.placeholder(tf.float32, [B, H, W, C])
 
-# localisation network
+# localization network
 W_fc1 = tf.Variable(tf.zeros([H*W*C, n_fc]), name='W_fc1')
 b_fc1 = tf.Variable(initial_value=initial, name='b_fc1')
 h_fc1 = tf.matmul(tf.zeros([B, H*W*C]), W_fc1) + b_fc1
