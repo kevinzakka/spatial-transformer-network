@@ -174,7 +174,6 @@ def bilinear_sampler(img, x, y):
     Returns
     -------
     - out: interpolated images according to grids. Same size as grid.
-
     """
     H = tf.shape(img)[1]
     W = tf.shape(img)[2]
