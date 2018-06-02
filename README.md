@@ -58,7 +58,7 @@ It can be constrained to one of *attention* by writing it in the form
  <img src="./img/attention.png" width="175px">
 </p>
 
-where the parameters `s`, `t_x` and `t_y` can be regressed to allow cropping, translation, and isotropic scaling. 
+where the parameters `s`, `t_x` and `t_y` can be regressed to allow cropping, translation, and isotropic scaling.
 
 For a more in-depth explanation of STNs, read the two part blog post: [part1](https://kevinzakka.github.io/2017/01/10/stn-part1/) and [part2](https://kevinzakka.github.io/2017/01/18/stn-part2/).
 
