@@ -8,6 +8,30 @@ This is a **Tensorflow** implementation of [Spatial Transformer Networks](https:
 
 *Spatial Transformer Networks* (STN) is a differentiable module that can be inserted anywhere in ConvNet architecture to increase its geometric invariance. It effectively gives the network the ability to spatially transform feature maps at no extra data or supervision cost.
 
+
+
+## Installation
+
+Install the `stn` package using:
+
+```
+pip3 install stn
+```
+
+Then, you can call the STN layer as follows:
+
+```python
+from stn import spatial_transformer_network as transformer
+
+out = transformer(input_feature_map, theta, out_dims)
+```
+
+**Parameters**
+
+- `input_feature_map`: the output of the layer preceding the localization network. If the STN layer is the first layer of the network, then this corresponds to the input images. Shape should be (B, H, W, C).
+- `theta`: this is the output of the localization network. Shape should be (B, 6)
+- `out_dims`: desired (H, W) of the output feature map. Useful for upsampling or downsampling. If not specified, then output dimensions will be equal to `input_feature_map` dimensions.
+
 ## Background Information
 
 <p align="center">
@@ -34,7 +58,9 @@ It can be constrained to one of *attention* by writing it in the form
  <img src="./img/attention.png" width="175px">
 </p>
 
-where the parameters `s`, `t_x` and `t_y` can be regressed to allow cropping, translation, and isotropic scaling.
+where the parameters `s`, `t_x` and `t_y` can be regressed to allow cropping, translation, and isotropic scaling. 
+
+For a more in-depth explanation of STNs, read the two part blog post: [part1](https://kevinzakka.github.io/2017/01/10/stn-part1/) and [part2](https://kevinzakka.github.io/2017/01/18/stn-part2/).
 
 ## Explore
 
@@ -45,25 +71,11 @@ Run the [Sanity Check](https://github.com/kevinzakka/spatial-transformer-network
  <img src="./img/after.png" alt="Drawing" width="40%">
 </p>
 
-## API 
-
-Calling the STN layer is done as follows:
-
-```python
-out = spatial_transformer_network(input_feature_map, theta, out_dims)
-```
-
-**Parameters**
-
-- `input_feature_map`: the output of the layer preceding the localization network. If the STN layer is the first layer of the network, then this corresponds to the input images. Shape should be (B, H, W, C).
-- `theta`: this is the output of the localization network. Shape should be (B, 6)
-- `out_dims`: desired (H, W) of the output feature map. Useful for upsampling or downsampling. If not specified, then output dimensions will be equal to `input_feature_map` dimensions.
-
-**Note**
+**Usage Note**
 
 You must define a localization network right before using this layer. The localization network is usually a ConvNet or a FC-net that has 6 output nodes (the 6 parameters of the affine transformation).
 
-You need to initialize the localization network to the identity transform before starting the training process. Here's a small sample code for illustration purposes.
+It is good practice to initialize the localization network to the identity transform before starting the training process. Here's a small sample code for illustration purposes.
 
 ```python
 # params
@@ -83,15 +95,8 @@ b_fc1 = tf.Variable(initial_value=initial, name='b_fc1')
 h_fc1 = tf.matmul(tf.zeros([B, H*W*C]), W_fc1) + b_fc1
 
 # spatial transformer layer
-h_trans = spatial_transformer_network(x, h_fc1)
+h_trans = transformer(x, h_fc1)
 ```
-
-## Requirements
-- tensorflow
-- jupyter
-- matplotlib
-- pillow
-- h5py
 
 ## Attribution
 

@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='stn',
-    version='0.0.1',
+    version='1.0.0',
     description='Spatial Transformer Networks.',
     long_description='Implementation of https://arxiv.org/abs/1506.02025',
     url='https://github.com/kevinzakka/spatial-transformer-network',
